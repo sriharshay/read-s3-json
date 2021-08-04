@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'SAM Template for read-s3-json
+
+  '
+Globals:
+  Function:
+    Timeout: 20
+Resources:
+  ReadS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: ${AWS::StackName}-${AWS::AccountId}-${AWS::Region}
+  ReadS3JsonFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Read S3 JSON Function
+      FunctionName: ReadS3JsonFunction
+      CodeUri: ReadS3JsonFunction
+      Handler: com.test.aws.lambda.importer.ReadS3Json::handler
+      Runtime: java11
+      MemorySize: 512
+      Policies:
+      - S3ReadPolicy:
+          BucketName:
+            Fn::Sub: ${AWS::StackName}-${AWS::AccountId}-${AWS::Region}
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket:
+              Ref: ReadS3Bucket
+            Events: s3:ObjectCreated:*
